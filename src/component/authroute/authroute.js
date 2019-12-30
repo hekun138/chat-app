@@ -5,7 +5,10 @@ import { loadData } from "../../redux/user.redux";
 import { connect } from "react-redux";
 
 @withRouter
-@connect(null, loadData)
+@connect(
+  null, 
+  { loadData }
+)
 class AuthRoute extends React.Component {
   componentDidMount() {
     const publicList = ["/login", "/register"];

@@ -30,12 +30,15 @@ Router.post('/register', function(req, res) {
     if(doc) {
       return res.json({code: 1, msg: '用户名重复'});
     }
-    User.create({ user, pwd: md5Pwd(pwd), type }, function(e, d) {
+    const userModel = new User({ user, pwd: md5Pwd(pwd), type })
+    userModel.save(function(e, d) {
       if (e) {
         return res.json({ code: 1, msg: "后端出错了" });
       }
-      return res.json({ code: 0 });
-    });
+      const { user, type, _id } = d;
+      res.cookie('userid', _id);
+      return res.json({ code: 0,data: {user}});
+    })
   })
 })
 
@@ -52,6 +55,21 @@ Router.get('/info', (req, res) => {
     if(doc) {
       return res.json({code: 0,data: doc});
     }
+  })
+})
+
+Router.post('/update', function(req, res) {
+  const userid = req.cookies.userid;
+  if(!userid) {
+    return json.dumps({code: 1});
+  }
+  const body = req.body;
+  User.findByIdAndUpdate(userid,body, function(err, doc) {
+    const data = Object.assign({}, {
+      user: doc.user,
+      type: doc.type
+    }, body)
+    return res.json({code: 0,data})
   })
 })
 
